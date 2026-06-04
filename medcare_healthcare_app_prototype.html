@@ -1,0 +1,887 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'SF Pro Display', sans-serif; background: #f0f4f8; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 16px 0; }
+  .phone { width: 375px; height: 780px; background: #fff; border-radius: 40px; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.18); position: relative; border: 8px solid #1a1a2e; display: flex; flex-direction: column; }
+  .status-bar { background: var(--sb-bg, #007BFF); color: #fff; font-size: 11px; font-weight: 600; padding: 8px 20px 4px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .screen { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; }
+  .screen::-webkit-scrollbar { display: none; }
+  .bottom-nav { background: #fff; border-top: 0.5px solid #e2e8f0; display: flex; padding: 8px 0 4px; flex-shrink: 0; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; padding: 4px 0; }
+  .nav-item .nav-icon { font-size: 22px; color: #94a3b8; }
+  .nav-item.active .nav-icon { color: #007BFF; }
+  .nav-item .nav-label { font-size: 9px; color: #94a3b8; font-weight: 500; }
+  .nav-item.active .nav-label { color: #007BFF; }
+  .btn-primary { background: #007BFF; color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; }
+  .btn-outline { background: #fff; color: #007BFF; border: 1.5px solid #007BFF; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; }
+  .btn-danger { background: #DC3545; color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; }
+  .card { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 12px; }
+  .input-field { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 13px 14px; font-size: 14px; color: #1a1a2e; background: #f8fafc; outline: none; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+  .badge-blue { background: #e3f0ff; color: #007BFF; }
+  .badge-green { background: #e6f9f0; color: #10b981; }
+  .badge-red { background: #fde8ea; color: #DC3545; }
+  .chip { border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 500; color: #475569; cursor: pointer; background: #fff; display: inline-block; }
+  .chip.active { border-color: #007BFF; color: #007BFF; background: #e3f0ff; }
+  .header { padding: 16px 20px 12px; display: flex; align-items: center; gap: 12px; }
+  .header-title { font-size: 18px; font-weight: 700; color: #1a1a2e; flex: 1; }
+  .back-btn { width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .section-title { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
+  .star { color: #f59e0b; font-size: 13px; }
+  .hidden { display: none !important; }
+  .divider { height: 0.5px; background: #e2e8f0; margin: 12px 0; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .provider-card { background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+  .avatar { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+  .notif-item { display: flex; gap: 12px; padding: 14px 20px; border-bottom: 0.5px solid #f1f5f9; align-items: flex-start; cursor: pointer; }
+  .msg-bubble { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 13px; line-height: 1.4; }
+  .msg-in { background: #f1f5f9; color: #1a1a2e; border-bottom-left-radius: 4px; }
+  .msg-out { background: #007BFF; color: #fff; border-bottom-right-radius: 4px; }
+  .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .map-placeholder { background: linear-gradient(135deg, #e3eff8 0%, #cce4f6 50%, #b8d9f2 100%); border-radius: 16px; height: 200px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .map-route { position: absolute; width: 60%; height: 3px; background: #007BFF; top: 50%; left: 20%; transform: translateY(-50%) rotate(-8deg); border-radius: 4px; opacity: 0.7; }
+  .map-pin { position: absolute; font-size: 28px; }
+  .toggle-switch { width: 44px; height: 24px; background: #10b981; border-radius: 12px; position: relative; cursor: pointer; }
+  .toggle-switch::after { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; right: 3px; transition: right 0.2s; }
+  .toggle-off { background: #e2e8f0; }
+  .toggle-off::after { right: auto; left: 3px; }
+  .progress-bar { height: 4px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #007BFF; border-radius: 4px; }
+  .sos-btn { width: 80px; height: 80px; border-radius: 50%; background: #DC3545; color: #fff; border: none; font-size: 14px; font-weight: 800; cursor: pointer; letter-spacing: 1px; box-shadow: 0 4px 20px rgba(220,53,69,0.4); }
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <div class="status-bar" id="statusBar">
+    <span>9:41 AM</span>
+    <span>MedCare</span>
+    <span><i class="ti ti-wifi"></i> <i class="ti ti-battery-2"></i></span>
+  </div>
+
+  <div class="screen" id="screen"></div>
+
+  <div class="bottom-nav hidden" id="bottomNav">
+    <div class="nav-item active" id="nav-home" onclick="goHome()">
+      <i class="ti ti-home nav-icon"></i>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" id="nav-bookings" onclick="showScreen('bookings')">
+      <i class="ti ti-calendar nav-icon"></i>
+      <span class="nav-label">Bookings</span>
+    </div>
+    <div class="nav-item" id="nav-chat" onclick="showScreen('chat')">
+      <i class="ti ti-message nav-icon"></i>
+      <span class="nav-label">Chat</span>
+    </div>
+    <div class="nav-item" id="nav-notifications" onclick="showScreen('notifications')">
+      <i class="ti ti-bell nav-icon"></i>
+      <span class="nav-label">Alerts</span>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="showScreen('profile')">
+      <i class="ti ti-user nav-icon"></i>
+      <span class="nav-label">Profile</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const S = document.getElementById('screen');
+const BN = document.getElementById('bottomNav');
+const SB = document.getElementById('statusBar');
+let currentScreen = '';
+
+function setNav(id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if(id) { const el = document.getElementById('nav-'+id); if(el) el.classList.add('active'); }
+}
+
+function setSBColor(c) { SB.style.background = c || '#007BFF'; }
+
+function showScreen(name, data) {
+  currentScreen = name;
+  S.innerHTML = '';
+  const screens = {
+    login, register, forgotPassword, home, emergency1, emergency2, emergency3, emergency4, emergency5,
+    paramedic, paramedicSummary, doctorConsult, hospitalModule, medicalRecords, notifications,
+    chat, chatDetail, profile, bookings, tracking
+  };
+  if(screens[name]) screens[name](data);
+}
+
+function goHome() { BN.classList.remove('hidden'); showScreen('home'); setNav('home'); setSBColor('#007BFF'); }
+
+function headerHtml(title, backFn) {
+  return `<div class="header">
+    <button class="back-btn" onclick="${backFn}">${'<i class="ti ti-arrow-left" style="color:#1a1a2e;font-size:18px"></i>'}</button>
+    <span class="header-title">${title}</span>
+  </div>`;
+}
+
+function login() {
+  BN.classList.add('hidden'); setSBColor('#fff'); SB.style.color='#1a1a2e';
+  S.innerHTML = `
+  <div style="padding:32px 24px 24px; flex:1; overflow-y:auto;">
+    <div style="text-align:center; margin-bottom:32px;">
+      <div style="width:72px;height:72px;background:#007BFF;border-radius:20px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;">
+        <i class="ti ti-heart-pulse" style="color:#fff;font-size:34px"></i>
+      </div>
+      <div style="font-size:26px;font-weight:800;color:#1a1a2e;">MedCare</div>
+      <div style="font-size:13px;color:#64748b;margin-top:4px;">Healthcare at your fingertips</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:16px;padding:4px;display:flex;margin-bottom:24px;">
+      <div style="flex:1;background:#fff;border-radius:12px;padding:10px;text-align:center;font-size:13px;font-weight:600;color:#007BFF;box-shadow:0 1px 4px rgba(0,0,0,0.08);">Mobile OTP</div>
+      <div style="flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;color:#64748b;">Email</div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px;">MOBILE NUMBER</div>
+      <div style="display:flex;gap:8px;">
+        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:13px 14px;font-size:14px;color:#1a1a2e;font-weight:600;">+91</div>
+        <input class="input-field" placeholder="Enter mobile number" style="flex:1;" type="tel">
+      </div>
+    </div>
+    <button class="btn-primary" onclick="showScreen('emergency1')" style="margin-bottom:12px;">Send OTP</button>
+    <div style="text-align:center;font-size:13px;color:#64748b;margin-bottom:16px;">
+      Don't have an account? <span style="color:#007BFF;font-weight:600;cursor:pointer;" onclick="showScreen('register')">Register</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="flex:1;height:0.5px;background:#e2e8f0;"></div>
+      <span style="font-size:12px;color:#94a3b8;">or continue with</span>
+      <div style="flex:1;height:0.5px;background:#e2e8f0;"></div>
+    </div>
+    <div style="border:1.5px solid #e2e8f0;border-radius:12px;padding:13px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;" onclick="goHome()">
+      <div style="width:20px;height:20px;background:#EA4335;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">G</div>
+      <span style="font-size:14px;font-weight:600;color:#1a1a2e;">Continue with Google</span>
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <span style="color:#007BFF;font-size:13px;cursor:pointer;" onclick="showScreen('forgotPassword')">Forgot Password?</span>
+    </div>
+  </div>`;
+}
+
+function register() {
+  BN.classList.add('hidden'); setSBColor('#007BFF'); SB.style.color='#fff';
+  S.innerHTML = `
+  ${headerHtml('Create Account','showScreen("login")')}
+  <div style="padding:0 20px 24px; overflow-y:auto; flex:1;">
+    ${['Full Name','Mobile Number','Email Address','Password','Confirm Password','Home Address'].map(f=>`
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px;">${f.toUpperCase()}</div>
+      <input class="input-field" placeholder="Enter ${f.toLowerCase()}">
+    </div>`).join('')}
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px;">EMERGENCY CONTACT</div>
+      <div style="display:flex;gap:8px;">
+        <input class="input-field" placeholder="Name" style="flex:1;">
+        <input class="input-field" placeholder="Phone" style="flex:1;">
+      </div>
+    </div>
+    <button class="btn-primary" onclick="goHome()">Create Account</button>
+    <div style="text-align:center;margin-top:14px;font-size:13px;color:#64748b;">
+      Already have an account? <span style="color:#007BFF;font-weight:600;cursor:pointer;" onclick="showScreen('login')">Login</span>
+    </div>
+  </div>`;
+}
+
+function forgotPassword() {
+  BN.classList.add('hidden'); setSBColor('#007BFF'); SB.style.color='#fff';
+  S.innerHTML = `
+  ${headerHtml('Reset Password','showScreen("login")')}
+  <div style="padding:24px 20px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:72px;height:72px;background:#e3f0ff;border-radius:20px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;">
+        <i class="ti ti-lock" style="color:#007BFF;font-size:32px"></i>
+      </div>
+      <div style="font-size:14px;color:#64748b;">Enter your mobile number to receive a reset OTP</div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px;">MOBILE NUMBER</div>
+      <input class="input-field" placeholder="+91 XXXXX XXXXX" type="tel">
+    </div>
+    <button class="btn-primary" onclick="showScreen('login')">Send Reset OTP</button>
+  </div>`;
+}
+
+function home() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('home');
+  S.innerHTML = `
+  <div style="background:linear-gradient(160deg,#007BFF,#0056cc);padding:20px 20px 28px;color:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+      <div>
+        <div style="font-size:13px;opacity:0.85;">Good Morning,</div>
+        <div style="font-size:20px;font-weight:700;">Arjun Sharma 👋</div>
+        <div style="font-size:12px;opacity:0.75;margin-top:2px;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:13px"></i> Mumbai, Maharashtra</div>
+      </div>
+      <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;">
+        <i class="ti ti-bell" style="font-size:20px;color:#fff;"></i>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+      <i class="ti ti-search" style="font-size:18px;opacity:0.8;"></i>
+      <span style="font-size:14px;opacity:0.75;">Search services, doctors...</span>
+    </div>
+  </div>
+  <div style="padding:0 16px;transform:translateY(-16px);">
+    <button class="btn-danger" onclick="showScreen('emergency1')" style="border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;box-shadow:0 6px 24px rgba(220,53,69,0.4);">
+      <i class="ti ti-ambulance" style="font-size:22px;"></i> EMERGENCY — Call Ambulance
+    </button>
+  </div>
+  <div style="padding:0 16px 16px;transform:translateY(-8px);">
+    <div class="section-title" style="margin-bottom:12px;">Our Services</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      ${[
+        {icon:'ti-ambulance',label:'Ambulance',color:'#fde8ea',ic:'#DC3545',fn:'emergency1'},
+        {icon:'ti-stethoscope',label:'Paramedic',color:'#e3f0ff',ic:'#007BFF',fn:'paramedic'},
+        {icon:'ti-building-hospital',label:'Hospital',color:'#e6f9f0',ic:'#10b981',fn:'hospitalModule'},
+        {icon:'ti-user-heart',label:'Doctor',color:'#f5f0ff',ic:'#8b5cf6',fn:'doctorConsult'}
+      ].map(s=>`
+      <div style="background:#fff;border-radius:16px;padding:18px 14px;box-shadow:0 2px 12px rgba(0,0,0,0.07);cursor:pointer;" onclick="showScreen('${s.fn}')">
+        <div style="width:46px;height:46px;background:${s.color};border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+          <i class="ti ${s.icon}" style="color:${s.ic};font-size:22px;"></i>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:#1a1a2e;">${s.label}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Book Now →</div>
+      </div>`).join('')}
+    </div>
+    <div class="section-title" style="margin-top:18px;margin-bottom:12px;">Quick Access</div>
+    <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;">
+      ${[
+        {icon:'ti-file-medical',label:'Records',fn:'medicalRecords'},
+        {icon:'ti-map-pin',label:'Tracking',fn:'tracking'},
+        {icon:'ti-report-medical',label:'Prescriptions',fn:'medicalRecords'},
+        {icon:'ti-first-aid-kit',label:'Lab Tests',fn:'medicalRecords'}
+      ].map(q=>`
+      <div style="background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer;text-align:center;min-width:70px;flex-shrink:0;" onclick="showScreen('${q.fn}')">
+        <i class="ti ${q.icon}" style="color:#007BFF;font-size:22px;"></i>
+        <div style="font-size:10px;color:#64748b;margin-top:6px;font-weight:500;">${q.label}</div>
+      </div>`).join('')}
+    </div>
+    <div class="section-title" style="margin-top:18px;margin-bottom:12px;">Recent Bookings</div>
+    ${[{n:'Nurse Visit',d:'Yesterday, 10:00 AM',s:'Completed',c:'green'},{n:'Dr. Meera Pillai',d:'Jun 1, 2:30 PM',s:'Upcoming',c:'blue'}].map(b=>`
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="showScreen('bookings')">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#1a1a2e;">${b.n}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${b.d}</div>
+      </div>
+      <span class="badge badge-${b.c}">${b.s}</span>
+    </div>`).join('')}
+  </div>`;
+}
+
+function emergency1() {
+  BN.classList.add('hidden'); setSBColor('#DC3545'); SB.style.color='#fff';
+  S.innerHTML = `
+  <div style="background:#DC3545;padding:20px 20px 32px;color:#fff;">
+    ${headerHtml('<span style="color:#fff">Emergency Booking</span>','goHome()').replace('color:#1a1a2e','color:#fff').replace('background:#f1f5f9','background:rgba(255,255,255,0.2)')}
+    <div style="padding:0 20px;text-align:center;">
+      <div style="font-size:13px;opacity:0.85;margin-bottom:6px;">Step 1 of 4</div>
+      <div style="font-size:18px;font-weight:700;">Confirm Your Location</div>
+    </div>
+  </div>
+  <div style="padding:20px;transform:translateY(-12px);">
+    <div style="progress-bar:none;display:flex;gap:6px;margin-bottom:16px;">
+      ${[1,2,3,4].map((i,idx)=>`<div style="flex:1;height:4px;background:${idx===0?'#DC3545':'#e2e8f0'};border-radius:4px;"></div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="map-placeholder">
+        <div class="map-route"></div>
+        <div class="map-pin" style="bottom:30%;left:45%;">📍</div>
+        <div style="position:absolute;top:10px;right:10px;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;color:#1a1a2e;font-weight:600;">GPS Active</div>
+      </div>
+      <div style="margin-top:14px;">
+        <div style="font-size:12px;color:#94a3b8;font-weight:500;margin-bottom:4px;">DETECTED LOCATION</div>
+        <div style="font-size:14px;font-weight:600;color:#1a1a2e;">14, Andheri West, Mumbai</div>
+        <div style="font-size:12px;color:#64748b;">Maharashtra 400053</div>
+      </div>
+      <div style="background:#e6f9f0;border-radius:10px;padding:10px;margin-top:12px;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-map-pin" style="color:#10b981;font-size:16px;"></i>
+        <span style="font-size:12px;color:#065f46;font-weight:500;">Location shared with Emergency Services</span>
+      </div>
+    </div>
+    <button class="btn-danger" onclick="showScreen('emergency2')" style="margin-top:8px;">Confirm Location & Continue</button>
+    <button class="btn-outline" style="margin-top:8px;">Change Location Manually</button>
+  </div>`;
+}
+
+function emergency2() {
+  BN.classList.add('hidden'); setSBColor('#DC3545'); SB.style.color='#fff';
+  S.innerHTML = `
+  <div style="background:#DC3545;padding:20px 20px 32px;color:#fff;">
+    <div style="padding:0 20px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <button class="back-btn" onclick="showScreen('emergency1')" style="background:rgba(255,255,255,0.2)"><i class="ti ti-arrow-left" style="color:#fff;font-size:18px"></i></button>
+      <span style="font-size:18px;font-weight:700;color:#fff;">Select Ambulance Type</span>
+    </div>
+    <div style="padding:0 20px;font-size:13px;opacity:0.85;">Step 2 of 4</div>
+  </div>
+  <div style="padding:20px;transform:translateY(-12px);">
+    <div style="display:flex;gap:6px;margin-bottom:16px;">
+      ${[1,2,3,4].map((i,idx)=>`<div style="flex:1;height:4px;background:${idx<2?'#DC3545':'#e2e8f0'};border-radius:4px;"></div>`).join('')}
+    </div>
+    ${[
+      {type:'General',icon:'ti-ambulance',desc:'For non-critical emergencies',price:'₹800',color:'#e3f0ff',ic:'#007BFF'},
+      {type:'ICU Ambulance',icon:'ti-heart-monitor',desc:'Advanced life support, ventilator',price:'₹2,500',color:'#fde8ea',ic:'#DC3545'},
+      {type:'Oxygen Support',icon:'ti-lungs',desc:'Oxygen cylinder + paramedic',price:'₹1,200',color:'#e6f9f0',ic:'#10b981'}
+    ].map(a=>`
+    <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer;border:1.5px solid #e2e8f0;" onclick="showScreen('emergency3')">
+      <div style="width:52px;height:52px;background:${a.color};border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="ti ${a.icon}" style="color:${a.ic};font-size:24px;"></i>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:#1a1a2e;">${a.type}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">${a.desc}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:14px;font-weight:700;color:#007BFF;">${a.price}</div>
+        <div style="font-size:10px;color:#94a3b8;">Base fare</div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function emergency3() {
+  BN.classList.add('hidden'); setSBColor('#DC3545'); SB.style.color='#fff';
+  S.innerHTML = `
+  <div style="background:#DC3545;padding:20px 20px 32px;color:#fff;text-align:center;">
+    <div style="font-size:13px;opacity:0.85;margin-bottom:4px;">Step 3 of 4</div>
+    <div style="font-size:18px;font-weight:700;">Finding Nearest Ambulance</div>
+  </div>
+  <div style="padding:20px;transform:translateY(-12px);text-align:center;">
+    <div style="display:flex;gap:6px;margin-bottom:24px;">
+      ${[1,2,3,4].map((i,idx)=>`<div style="flex:1;height:4px;background:${idx<3?'#DC3545':'#e2e8f0'};border-radius:4px;"></div>`).join('')}
+    </div>
+    <div class="card" style="padding:32px 20px;">
+      <div style="width:80px;height:80px;background:#fde8ea;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;">
+        <i class="ti ti-ambulance" style="color:#DC3545;font-size:36px;"></i>
+      </div>
+      <div style="font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">Finding nearest ambulance…</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:24px;">Checking 12 ambulances in your area</div>
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:20px;">
+        ${[0,1,2].map(i=>`<div style="width:10px;height:10px;background:#DC3545;border-radius:50%;opacity:${0.3+i*0.35};"></div>`).join('')}
+      </div>
+      <div style="background:#f8fafc;border-radius:12px;padding:12px;">
+        ${['Connecting to dispatch center','Checking ambulance availability','Calculating optimal route'].map((s,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;${i<2?'border-bottom:0.5px solid #e2e8f0;':''}">
+          <i class="ti ti-check" style="color:#10b981;font-size:14px;"></i>
+          <span style="font-size:12px;color:#64748b;">${s}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <button class="btn-danger" onclick="showScreen('emergency4')" style="margin-top:16px;">Skip (Demo)</button>
+  </div>`;
+}
+
+function emergency4() {
+  BN.classList.add('hidden'); setSBColor('#10b981'); SB.style.color='#fff';
+  S.innerHTML = `
+  <div style="background:#10b981;padding:20px 20px 32px;color:#fff;text-align:center;">
+    <div style="font-size:13px;opacity:0.85;margin-bottom:4px;">Step 4 of 4</div>
+    <div style="font-size:20px;font-weight:800;">Ambulance Dispatched!</div>
+  </div>
+  <div style="padding:20px;transform:translateY(-12px);text-align:center;">
+    <div class="card" style="padding:28px 20px;">
+      <div style="width:80px;height:80px;background:#e6f9f0;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+        <i class="ti ti-check" style="color:#10b981;font-size:36px;"></i>
+      </div>
+      <div style="font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">Ambulance is on the way!</div>
+      <div style="font-size:32px;font-weight:800;color:#10b981;margin:16px 0;">8 min ETA</div>
+      <div style="background:#f8fafc;border-radius:14px;padding:14px;text-align:left;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div class="avatar" style="background:#e3f0ff;color:#007BFF;">RK</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#1a1a2e;">Raju Kumar</div>
+            <div style="font-size:12px;color:#64748b;">EMT | MH12-XX-1234</div>
+            <div style="display:flex;gap:2px;margin-top:2px;">${'★'.repeat(5).split('').map(()=>'<span class="star">★</span>').join('')}</div>
+          </div>
+          <div style="margin-left:auto;">
+            <div style="width:40px;height:40px;background:#e6f9f0;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+              <i class="ti ti-phone" style="color:#10b981;font-size:18px;"></i>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:12px;color:#64748b;">General Ambulance • Vehicle: MH-12 XX 1234</div>
+      </div>
+      <button class="btn-outline" onclick="showScreen('tracking')" style="margin-bottom:10px;"><i class="ti ti-map-pin"></i> Track Live Location</button>
+      <button style="background:#f1f5f9;color:#64748b;border:none;border-radius:12px;padding:12px;width:100%;font-size:14px;font-weight:500;cursor:pointer;">Share Location with Family</button>
+    </div>
+    <div style="margin-top:16px;display:flex;justify-content:center;">
+      <button class="sos-btn" onclick="">SOS</button>
+    </div>
+    <div style="font-size:12px;color:#94a3b8;margin-top:10px;">Press SOS for immediate assistance</div>
+  </div>`;
+}
+
+function emergency5() { tracking(); }
+
+function tracking() {
+  BN.classList.add('hidden'); setSBColor('#1a1a2e'); SB.style.color='#fff';
+  S.innerHTML = `
+  ${headerHtml('Live Tracking','goHome()').replace('background:#f1f5f9','background:rgba(255,255,255,0.15)').replace('color:#1a1a2e','color:#fff')}
+  <div style="padding:0 16px 16px;">
+    <div class="map-placeholder" style="height:260px;margin-bottom:16px;">
+      <div class="map-route" style="width:50%;transform:translateY(-50%) rotate(-20deg);"></div>
+      <div class="map-pin" style="bottom:25%;left:30%;">🚑</div>
+      <div class="map-pin" style="top:25%;right:30%;">📍</div>
+      <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:#fff;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:#007BFF;white-space:nowrap;">ETA: 6 min • 2.4 km away</div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+      <div class="avatar" style="background:#fde8ea;color:#DC3545;">RK</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:700;color:#1a1a2e;">Raju Kumar — EMT</div>
+        <div style="font-size:12px;color:#10b981;">● En route to your location</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div style="width:36px;height:36px;background:#e3f0ff;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          <i class="ti ti-phone" style="color:#007BFF;font-size:16px;"></i>
+        </div>
+        <div style="width:36px;height:36px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="showScreen('chatDetail')">
+          <i class="ti ti-message" style="color:#64748b;font-size:16px;"></i>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="card" style="text-align:center;padding:14px;">
+        <div style="font-size:24px;font-weight:800;color:#007BFF;">6</div>
+        <div style="font-size:11px;color:#64748b;">Minutes ETA</div>
+      </div>
+      <div class="card" style="text-align:center;padding:14px;">
+        <div style="font-size:24px;font-weight:800;color:#10b981;">2.4</div>
+        <div style="font-size:11px;color:#64748b;">km Away</div>
+      </div>
+    </div>
+    <button style="background:#f1f5f9;color:#475569;border:none;border-radius:12px;padding:12px;width:100%;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:8px;">Share Location with Family</button>
+    <div style="display:flex;justify-content:center;margin-top:8px;">
+      <button class="sos-btn">SOS</button>
+    </div>
+  </div>`;
+}
+
+function paramedic() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('home');
+  S.innerHTML = `
+  ${headerHtml('Paramedic Services','goHome()')}
+  <div style="padding:0 16px 16px;">
+    <div style="overflow-x:auto;display:flex;gap:8px;padding-bottom:8px;margin-bottom:14px;">
+      ${['Nurse','Aya','Lab Tech','Physiotherapist','Caregiver','Midwife'].map((s,i)=>`
+      <div class="chip ${i===0?'active':''}" style="white-space:nowrap;">${s}</div>`).join('')}
+    </div>
+    <div style="background:#fff;border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,0.06);margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:10px;">Filters</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        ${[
+          {l:'Gender',opts:['Any','Male','Female']},
+          {l:'Duration',opts:['Hourly','Daily','Weekly']},
+          {l:'Shift',opts:['Day','Night','24 Hrs']},
+          {l:'Experience',opts:['Any','Fresher','Experienced']}
+        ].map(f=>`
+        <div>
+          <div style="font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:4px;">${f.l.toUpperCase()}</div>
+          <select style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;color:#1a1a2e;background:#f8fafc;outline:none;">
+            ${f.opts.map(o=>`<option>${o}</option>`).join('')}
+          </select>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
+        <span style="font-size:13px;font-weight:600;color:#1a1a2e;">Emergency Priority</span>
+        <div class="toggle-switch"></div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-bottom:10px;">Available Providers (12)</div>
+    ${[
+      {n:'Priya Nair',r:'4.9',e:'5 yrs',p:'₹350/hr',d:'0.8 km',col:'#e3f0ff',tc:'#007BFF'},
+      {n:'Suresh Kumar',r:'4.7',e:'3 yrs',p:'₹280/hr',d:'1.2 km',col:'#e6f9f0',tc:'#10b981'},
+      {n:'Ananya Patel',r:'4.8',e:'7 yrs',p:'₹400/hr',d:'2.1 km',col:'#f5f0ff',tc:'#8b5cf6'}
+    ].map(p=>`
+    <div class="provider-card" onclick="showScreen('paramedicSummary')">
+      <div class="avatar" style="background:${p.col};color:${p.tc};">${p.n.split(' ').map(w=>w[0]).join('')}</div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="font-size:14px;font-weight:700;color:#1a1a2e;">${p.n}</div>
+          <span class="badge badge-blue">${p.p}</span>
+        </div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">Registered Nurse • ${p.e}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+          <span class="star">★</span><span style="font-size:12px;font-weight:600;color:#1a1a2e;">${p.r}</span>
+          <span style="font-size:11px;color:#94a3b8;">• ${p.d} away</span>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function paramedicSummary() {
+  BN.classList.add('hidden'); setSBColor('#007BFF'); SB.style.color='#fff';
+  S.innerHTML = `
+  ${headerHtml('Booking Summary','showScreen("paramedic")')}
+  <div style="padding:0 16px 16px;">
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div class="avatar" style="background:#e3f0ff;color:#007BFF;width:56px;height:56px;font-size:18px;">PN</div>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#1a1a2e;">Priya Nair</div>
+          <div style="font-size:12px;color:#64748b;">Registered Nurse • 5 yrs exp.</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:3px;"><span class="star">★</span><span style="font-size:12px;font-weight:600;">4.9</span></div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      ${[['Service','Nurse Visit (Day Shift)'],['Date','June 7, 2026'],['Time','9:00 AM – 1:00 PM (4 hrs)'],['Address','14, Andheri West, Mumbai']].map(([k,v])=>`
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid #f1f5f9;">
+        <span style="font-size:13px;color:#64748b;">${k}</span>
+        <span style="font-size:13px;font-weight:600;color:#1a1a2e;text-align:right;max-width:55%;">${v}</span>
+      </div>`).join('')}
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div class="section-title" style="margin-bottom:10px;">Payment Details</div>
+      ${[['Service (4 hrs @ ₹350/hr)','₹1,400'],['GST (18%)','₹252'],['Platform Fee','₹30']].map(([k,v])=>`
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #f1f5f9;">
+        <span style="font-size:13px;color:#64748b;">${k}</span>
+        <span style="font-size:13px;color:#1a1a2e;">${v}</span>
+      </div>`).join('')}
+      <div style="display:flex;justify-content:space-between;padding:10px 0 0;">
+        <span style="font-size:15px;font-weight:700;color:#1a1a2e;">Total</span>
+        <span style="font-size:15px;font-weight:700;color:#007BFF;">₹1,682</span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:12px;">Payment Method</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        ${[
+          {l:'Razorpay',ic:'ti-credit-card'},
+          {l:'UPI',ic:'ti-device-mobile'},
+          {l:'Net Banking',ic:'ti-building-bank'},
+          {l:'Cash',ic:'ti-cash'}
+        ].map((m,i)=>`
+        <div style="border:${i===0?'2px solid #007BFF':'1.5px solid #e2e8f0'};border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;cursor:pointer;background:${i===0?'#e3f0ff':'#fff'};">
+          <i class="ti ${m.ic}" style="color:${i===0?'#007BFF':'#64748b'};font-size:16px;"></i>
+          <span style="font-size:12px;font-weight:${i===0?'700':'500'};color:${i===0?'#007BFF':'#64748b'};">${m.l}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <button class="btn-primary" onclick="goHome()" style="margin-bottom:8px;">Confirm & Pay ₹1,682</button>
+    <button class="btn-outline">Generate Invoice PDF</button>
+  </div>`;
+}
+
+function doctorConsult() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('home');
+  S.innerHTML = `
+  ${headerHtml('Doctor Consultation','goHome()')}
+  <div style="padding:0 16px 16px;">
+    <div style="background:linear-gradient(135deg,#007BFF,#0056cc);border-radius:18px;padding:18px;color:#fff;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Online Consultation</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        ${[
+          {ic:'ti-video',l:'Video Call',d:'Face-to-face with doctor'},
+          {ic:'ti-phone',l:'Voice Call',d:'Audio consultation'},
+          {ic:'ti-message-dots',l:'Chat',d:'Text-based consultation'},
+          {ic:'ti-file-upload',l:'E-Prescription',d:'Upload & get reviewed'}
+        ].map(c=>`
+        <div style="background:rgba(255,255,255,0.15);border-radius:14px;padding:12px;cursor:pointer;">
+          <i class="ti ${c.ic}" style="font-size:22px;color:#fff;"></i>
+          <div style="font-size:12px;font-weight:700;color:#fff;margin-top:8px;">${c.l}</div>
+          <div style="font-size:10px;opacity:0.8;margin-top:2px;">${c.d}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="section-title" style="margin-bottom:12px;">Offline Clinics Nearby</div>
+    ${[
+      {n:'Dr. Meera Pillai',sp:'Cardiologist',cl:'Apollo Clinic, Andheri',t:'10:30 AM',q:'3 patients ahead'},
+      {n:'Dr. Arjun Seth',sp:'General Physician',cl:'Fortis OPD, Bandra',t:'11:00 AM',q:'1 patient ahead'},
+      {n:'Dr. Sunita Rao',sp:'Gynecologist',cl:'Nanavati Hospital',t:'2:00 PM',q:'Next available'}
+    ].map(d=>`
+    <div class="card" style="cursor:pointer;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div class="avatar" style="background:#f5f0ff;color:#8b5cf6;">${d.n.split(' ').slice(1).map(w=>w[0]).join('')}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:700;color:#1a1a2e;">${d.n}</div>
+          <div style="font-size:12px;color:#64748b;">${d.sp} • ${d.cl}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <span class="badge badge-blue">Slot: ${d.t}</span>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">${d.q}</div>
+        </div>
+        <button class="btn-primary" style="width:auto;padding:8px 16px;font-size:12px;">Book</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function hospitalModule() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('home');
+  S.innerHTML = `
+  ${headerHtml('Hospital Services','goHome()')}
+  <div style="padding:0 16px 16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      ${[
+        {l:'Daycare',ic:'ti-bed',d:'Day procedures',col:'#e3f0ff',ic2:'#007BFF'},
+        {l:'Emergency',ic:'ti-alert-triangle',d:'24x7 Emergency',col:'#fde8ea',ic2:'#DC3545'},
+        {l:'Planned Admission',ic:'ti-calendar-plus',d:'Schedule surgery',col:'#e6f9f0',ic2:'#10b981'},
+        {l:'OPD',ic:'ti-stethoscope',d:'Outpatient dept.',col:'#f5f0ff',ic2:'#8b5cf6'}
+      ].map(s=>`
+      <div style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.07);cursor:pointer;">
+        <div style="width:44px;height:44px;background:${s.col};border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+          <i class="ti ${s.ic}" style="color:${s.ic2};font-size:20px;"></i>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#1a1a2e;">${s.l}</div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${s.d}</div>
+      </div>`).join('')}
+    </div>
+    <div class="section-title" style="margin-bottom:10px;">Nearby Hospitals</div>
+    ${[
+      {n:'Apollo Hospital',loc:'Andheri West',beds:'12 beds',r:'4.8'},
+      {n:'Lilavati Hospital',loc:'Bandra West',beds:'3 beds',r:'4.9'},
+      {n:'Nanavati Hospital',loc:'Vile Parle',beds:'8 beds',r:'4.6'}
+    ].map(h=>`
+    <div class="card" style="cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#1a1a2e;">${h.n}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;"><i class="ti ti-map-pin" style="font-size:12px;"></i> ${h.loc}</div>
+        </div>
+        <span class="badge badge-green">${h.beds} available</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:10px;">
+        <span class="star">★</span><span style="font-size:12px;font-weight:600;">${h.r}</span>
+        <span style="font-size:11px;color:#94a3b8;">• 24x7 Emergency</span>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;font-style:italic;margin-bottom:12px;">"Excellent care, very professional staff. Highly recommended."</div>
+      <button class="btn-primary" style="padding:10px;font-size:13px;">Request Admission</button>
+    </div>`).join('')}
+  </div>`;
+}
+
+function medicalRecords() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('home');
+  S.innerHTML = `
+  ${headerHtml('Medical Records','goHome()')}
+  <div style="padding:0 16px 16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      ${[
+        {l:'Prescriptions',ic:'ti-prescription',c:'5 files',col:'#e3f0ff',ic2:'#007BFF'},
+        {l:'Lab Reports',ic:'ti-test-pipe',c:'8 reports',col:'#e6f9f0',ic2:'#10b981'},
+        {l:'Scan Results',ic:'ti-scan',c:'3 scans',col:'#fde8ea',ic2:'#DC3545'},
+        {l:'Medical History',ic:'ti-history',c:'Full record',col:'#f5f0ff',ic2:'#8b5cf6'}
+      ].map(r=>`
+      <div style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.07);cursor:pointer;">
+        <div style="width:42px;height:42px;background:${r.col};border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+          <i class="ti ${r.ic}" style="color:${r.ic2};font-size:19px;"></i>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#1a1a2e;">${r.l}</div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${r.c}</div>
+      </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;font-size:13px;"><i class="ti ti-upload"></i> Upload PDF</button>
+      <button class="btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;font-size:13px;"><i class="ti ti-download"></i> Download PDF</button>
+    </div>
+    <div class="section-title" style="margin-bottom:10px;">Recent Documents</div>
+    ${[
+      {n:'Blood Report – June 2026',d:'Jun 1, 2026',t:'Lab Report',ic:'ti-file-text',col:'#e6f9f0',tc:'#10b981'},
+      {n:'Dr. Pillai Prescription',d:'May 28, 2026',t:'Prescription',ic:'ti-prescription',col:'#e3f0ff',tc:'#007BFF'},
+      {n:'Chest X-Ray',d:'May 20, 2026',t:'Scan',ic:'ti-scan',col:'#fde8ea',tc:'#DC3545'}
+    ].map(f=>`
+    <div class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+      <div style="width:44px;height:44px;background:${f.col};border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="ti ${f.ic}" style="color:${f.tc};font-size:20px;"></i>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#1a1a2e;">${f.n}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${f.d} • ${f.t}</div>
+      </div>
+      <i class="ti ti-download" style="color:#007BFF;font-size:18px;"></i>
+    </div>`).join('')}
+  </div>`;
+}
+
+function notifications() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('notifications');
+  S.innerHTML = `
+  <div style="padding:16px 20px 10px;font-size:20px;font-weight:800;color:#1a1a2e;">Notifications</div>
+  ${[
+    {t:'Booking Confirmed',d:'Your nurse visit is confirmed for Jun 7',time:'Just now',ic:'ti-check',col:'#e6f9f0',ic2:'#10b981',unread:true},
+    {t:'Provider Assigned',d:'Priya Nair will be your nurse today',time:'2 min ago',ic:'ti-user-check',col:'#e3f0ff',ic2:'#007BFF',unread:true},
+    {t:'Provider Arriving',d:'Priya is 5 minutes away from your location',time:'8 min ago',ic:'ti-map-pin',col:'#fff9e6',ic2:'#f59e0b',unread:true},
+    {t:'Service Started',d:'Your home nursing session has begun',time:'1 hr ago',ic:'ti-stethoscope',col:'#e3f0ff',ic2:'#007BFF',unread:false},
+    {t:'Payment Success',d:'₹1,682 paid via Razorpay',time:'Yesterday',ic:'ti-check',col:'#e6f9f0',ic2:'#10b981',unread:false},
+    {t:'Service Completed',d:'Your nursing session has ended. Rate your experience.',time:'Yesterday',ic:'ti-star',col:'#fff9e6',ic2:'#f59e0b',unread:false}
+  ].map(n=>`
+  <div class="notif-item" style="${n.unread?'background:#f8fbff;':''}">
+    <div style="width:40px;height:40px;background:${n.col};border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <i class="ti ${n.ic}" style="color:${n.ic2};font-size:18px;"></i>
+    </div>
+    <div style="flex:1;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div style="font-size:13px;font-weight:${n.unread?'700':'600'};color:#1a1a2e;">${n.t}</div>
+        ${n.unread?'<div style="width:8px;height:8px;background:#007BFF;border-radius:50%;margin-top:4px;flex-shrink:0;"></div>':''}
+      </div>
+      <div style="font-size:12px;color:#64748b;margin-top:2px;">${n.d}</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px;">${n.time}</div>
+    </div>
+  </div>`).join('')}`;
+}
+
+function chat() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('chat');
+  S.innerHTML = `
+  <div style="padding:16px 20px 10px;font-size:20px;font-weight:800;color:#1a1a2e;">Messages</div>
+  ${[
+    {n:'Priya Nair (Nurse)',m:'I will arrive in 10 minutes',t:'9:45 AM',unread:2,av:'PN',col:'#e3f0ff',tc:'#007BFF'},
+    {n:'Support Admin',m:'Your issue has been resolved.',t:'Yesterday',unread:0,av:'SA',col:'#f5f0ff',tc:'#8b5cf6'},
+    {n:'Dr. Meera Pillai',m:'Please follow up in 2 weeks.',t:'Jun 1',unread:0,av:'MP',col:'#e6f9f0',tc:'#10b981'},
+    {n:'MedCare Support',m:'How was your experience today?',t:'May 30',unread:0,av:'MC',col:'#fde8ea',tc:'#DC3545'}
+  ].map(c=>`
+  <div onclick="showScreen('chatDetail')" style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:0.5px solid #f1f5f9;cursor:pointer;">
+    <div class="avatar" style="background:${c.col};color:${c.tc};">${c.av}</div>
+    <div style="flex:1;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:14px;font-weight:${c.unread?'700':'600'};color:#1a1a2e;">${c.n}</div>
+        <div style="font-size:11px;color:#94a3b8;">${c.t}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px;">
+        <div style="font-size:12px;color:#64748b;">${c.m}</div>
+        ${c.unread?`<div style="width:18px;height:18px;background:#007BFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;">${c.unread}</div>`:'<i class="ti ti-checks" style="color:#10b981;font-size:14px;"></i>'}
+      </div>
+    </div>
+  </div>`).join('')}`;
+}
+
+function chatDetail() {
+  BN.classList.add('hidden'); setSBColor('#007BFF'); SB.style.color='#fff';
+  S.innerHTML = `
+  <div style="background:#007BFF;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+    <button onclick="showScreen('chat')" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+      <i class="ti ti-arrow-left" style="color:#fff;font-size:16px;"></i>
+    </button>
+    <div class="avatar" style="width:38px;height:38px;background:rgba(255,255,255,0.25);color:#fff;font-size:14px;">PN</div>
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#fff;">Priya Nair</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.8);">● Online</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <i class="ti ti-phone" style="color:#fff;font-size:20px;cursor:pointer;"></i>
+      <i class="ti ti-video" style="color:#fff;font-size:20px;cursor:pointer;"></i>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px;">
+    <div style="text-align:center;font-size:11px;color:#94a3b8;margin-bottom:16px;">Today, 9:30 AM</div>
+    <div style="margin-bottom:12px;"><div class="msg-bubble msg-in">Hello! I am Priya, your assigned nurse. I'll be there shortly.</div></div>
+    <div style="margin-bottom:12px;display:flex;justify-content:flex-end;"><div class="msg-bubble msg-out">Thanks! I'm at home. Ring the bell.</div></div>
+    <div style="margin-bottom:12px;"><div class="msg-bubble msg-in">Sure! I'm 5 minutes away. <i class="ti ti-map-pin"></i></div></div>
+    <div style="margin-bottom:12px;display:flex;justify-content:flex-end;">
+      <div class="msg-bubble msg-out" style="display:flex;align-items:center;gap:6px;">
+        <i class="ti ti-file" style="font-size:16px;"></i> prescription.pdf
+      </div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div class="msg-bubble msg-in">Got it, I'll review before arriving. ✓✓</div>
+    </div>
+  </div>
+  <div style="padding:12px 16px;background:#fff;border-top:0.5px solid #e2e8f0;display:flex;gap:10px;align-items:center;">
+    <i class="ti ti-paperclip" style="color:#94a3b8;font-size:20px;cursor:pointer;"></i>
+    <input class="input-field" placeholder="Type a message..." style="flex:1;padding:10px 14px;">
+    <div style="width:38px;height:38px;background:#007BFF;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+      <i class="ti ti-send" style="color:#fff;font-size:16px;"></i>
+    </div>
+  </div>`;
+}
+
+function profile() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('profile');
+  S.innerHTML = `
+  <div style="background:linear-gradient(160deg,#007BFF,#0056cc);padding:24px 20px 32px;text-align:center;color:#fff;">
+    <div style="width:72px;height:72px;background:rgba(255,255,255,0.25);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;">AS</div>
+    <div style="font-size:18px;font-weight:700;">Arjun Sharma</div>
+    <div style="font-size:13px;opacity:0.8;margin-top:4px;">+91 98765 43210 • arjun@email.com</div>
+    <div style="font-size:12px;opacity:0.7;margin-top:4px;">Member since Jan 2025</div>
+  </div>
+  <div style="padding:16px;transform:translateY(-12px);">
+    <div class="card" style="display:flex;justify-content:space-around;text-align:center;padding:16px;">
+      ${[['14','Bookings'],['4.8','My Rating'],['₹12.4k','Spent']].map(([v,l])=>`
+      <div><div style="font-size:20px;font-weight:800;color:#007BFF;">${v}</div><div style="font-size:11px;color:#64748b;margin-top:2px;">${l}</div></div>`).join('')}
+    </div>
+    <div class="section-title" style="margin:12px 0 10px;">Referral Code</div>
+    <div style="background:#e3f0ff;border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div>
+        <div style="font-size:11px;color:#64748b;font-weight:500;">Your Code</div>
+        <div style="font-size:20px;font-weight:800;color:#007BFF;letter-spacing:3px;">ARJUN50</div>
+      </div>
+      <button style="background:#007BFF;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;">Share</button>
+    </div>
+    <div class="section-title" style="margin-bottom:10px;">Settings</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid #f1f5f9;">
+        <span style="font-size:14px;color:#1a1a2e;">Dark Mode</span>
+        <div class="toggle-switch toggle-off"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:0.5px solid #f1f5f9;">
+        <span style="font-size:14px;color:#1a1a2e;">Language</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:13px;color:#64748b;">English</span>
+          <i class="ti ti-chevron-right" style="color:#94a3b8;font-size:16px;"></i>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:0.5px solid #f1f5f9;">
+        <span style="font-size:14px;color:#1a1a2e;">Notifications</span>
+        <div class="toggle-switch"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
+        <span style="font-size:14px;color:#1a1a2e;">Privacy Settings</span>
+        <i class="ti ti-chevron-right" style="color:#94a3b8;font-size:16px;"></i>
+      </div>
+    </div>
+    <div class="card" style="margin-top:10px;">
+      ${[['ti-history','Booking History',''],['ti-refresh','Rebook Previous Service',''],['ti-headset','Help & Support',''],['ti-shield-check','Privacy Policy','']].map(([ic,l])=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid #f1f5f9;cursor:pointer;">
+        <i class="ti ${ic}" style="color:#64748b;font-size:18px;"></i>
+        <span style="font-size:14px;color:#1a1a2e;">${l}</span>
+        <i class="ti ti-chevron-right" style="color:#94a3b8;font-size:16px;margin-left:auto;"></i>
+      </div>`).join('')}
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer;" onclick="showScreen('login')">
+        <i class="ti ti-logout" style="color:#DC3545;font-size:18px;"></i>
+        <span style="font-size:14px;color:#DC3545;font-weight:600;">Logout</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bookings() {
+  BN.classList.remove('hidden'); setSBColor('#007BFF'); SB.style.color='#fff'; setNav('bookings');
+  S.innerHTML = `
+  <div style="padding:16px 20px 10px;font-size:20px;font-weight:800;color:#1a1a2e;">My Bookings</div>
+  <div style="padding:0 20px 10px;display:flex;gap:8px;">
+    ${['All','Upcoming','Completed','Cancelled'].map((t,i)=>`
+    <div class="chip ${i===0?'active':''}" style="white-space:nowrap;font-size:11px;">${t}</div>`).join('')}
+  </div>
+  <div style="padding:0 16px 16px;">
+    ${[
+      {s:'Upcoming',n:'Nurse Visit – Priya Nair',d:'Jun 7, 2026 • 9:00 AM',p:'₹1,682',c:'blue'},
+      {s:'Upcoming',n:'Dr. Meera Pillai – Video Call',d:'Jun 10, 2026 • 3:00 PM',p:'₹500',c:'blue'},
+      {s:'Completed',n:'Lab Technician Visit',d:'May 28, 2026',p:'₹600',c:'green'},
+      {s:'Completed',n:'Physiotherapist – Day Shift',d:'May 20, 2026',p:'₹1,200',c:'green'},
+      {s:'Cancelled',n:'Ambulance – General',d:'May 10, 2026',p:'₹800',c:'red'}
+    ].map(b=>`
+    <div class="card" style="cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1a1a2e;">${b.n}</div>
+        <span class="badge badge-${b.c}">${b.s}</span>
+      </div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:10px;">${b.d}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:14px;font-weight:700;color:#007BFF;">${b.p}</span>
+        ${b.s==='Completed'?`<button style="background:#e3f0ff;color:#007BFF;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Rebook</button>`:
+          b.s==='Upcoming'?`<button class="btn-primary" style="width:auto;padding:6px 12px;font-size:11px;" onclick="showScreen('tracking')">Track</button>`:''}
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+showScreen('login');
+</script>
+</body>
+</html>
